@@ -100,6 +100,22 @@ export default function ListingDetail() {
                 </div>
               </div>
             )}
+            
+            {currentUser && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleWishlist(listing.id);
+                }}
+                className={`absolute top-4 right-4 p-3 rounded-2xl backdrop-blur-md border transition-all duration-300 z-20 ${
+                  currentUser.wishlist?.includes(listing.id)
+                    ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/30'
+                    : 'bg-white/90 border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 shadow-sm'
+                }`}
+              >
+                <Heart size={24} fill={currentUser.wishlist?.includes(listing.id) ? 'currentColor' : 'none'} />
+              </button>
+            )}
           </div>
 
           {/* Title + Description */}

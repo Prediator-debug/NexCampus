@@ -295,11 +295,18 @@ export const useStore = create((set, get) => ({
     } else {
       // Mock logic
       if (email === 'shubhamtorkad77@gmail.com' || email === 'jadhavdarshan440@gmail.com') {
-        set({ currentUser: { id: email === 'shubhamtorkad77@gmail.com' ? 'admin1' : 'admin2', name: email === 'shubhamtorkad77@gmail.com' ? 'Admin' : 'Darshan Admin', email, role: 'admin' } });
+        const id = email === 'shubhamtorkad77@gmail.com' ? 'admin1' : 'admin2';
+        const name = email === 'shubhamtorkad77@gmail.com' ? 'Admin' : 'Darshan Admin';
+        const adminUser = get().users.find(u => u.id === id) || { id, name, email, role: 'admin', wishlist: [] };
+        set({ currentUser: { ...adminUser, wishlist: adminUser.wishlist || [] } });
         return;
       }
       const existingUser = get().users.find(u => u.email === email);
-      set({ currentUser: existingUser ? { ...existingUser, role: 'student' } : { id: Date.now().toString(), name: 'Student', email, role: 'student', status: 'pending' } });
+      set({ 
+        currentUser: existingUser 
+          ? { ...existingUser, wishlist: existingUser.wishlist || [], role: 'student' } 
+          : { id: Date.now().toString(), name: 'Student', email, role: 'student', status: 'pending', wishlist: [] } 
+      });
     }
   },
 
@@ -347,13 +354,23 @@ export const useStore = create((set, get) => ({
       ? currentWishlist.filter(id => id !== listingId)
       : [...currentWishlist, listingId];
 
+    // Optimistic Update
+    set(state => ({
+      currentUser: { ...state.currentUser, wishlist: newWishlist },
+      users: state.users.map(u => u.id === state.currentUser?.id ? { ...u, wishlist: newWishlist } : u)
+    }));
+
     if (isFirebaseActive) {
-      await setDoc(doc(db, 'users', currentUser.id), { wishlist: newWishlist }, { merge: true });
-    } else {
-      set(state => ({
-        currentUser: { ...state.currentUser, wishlist: newWishlist },
-        users: state.users.map(u => u.id === state.currentUser.id ? { ...u, wishlist: newWishlist } : u)
-      }));
+      try {
+        await setDoc(doc(db, 'users', currentUser.id), { wishlist: newWishlist }, { merge: true });
+      } catch (error) {
+        console.error('Error updating wishlist in Firestore:', error);
+        // Rollback on failure (optional, but good for UX)
+        set(state => ({
+          currentUser: { ...state.currentUser, wishlist: currentWishlist },
+          users: state.users.map(u => u.id === state.currentUser?.id ? { ...u, wishlist: currentWishlist } : u)
+        }));
+      }
     }
   },
   

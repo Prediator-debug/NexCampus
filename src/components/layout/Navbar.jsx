@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bell, User, LogOut, MessageCircle, Menu, X, Heart } from 'lucide-react';
 import { useStore } from '../../store/useStore';
@@ -13,18 +13,21 @@ export default function Navbar() {
   const latestNotifications = circulars.slice(0, 5);
   const hasImportant = circulars.some(c => c.important);
   const unreadCount = messages.filter(m => (m.receiverId === currentUser?.id || m.receiverId === 'any' || !m.receiverId) && !m.isRead).length;
-  const [lastViewed, setLastViewed] = useState(() => localStorage.getItem('lastViewedCirculars') || '0');
+  const [lastViewedId, setLastViewedId] = useState(() => localStorage.getItem('lastViewedCircularId') || '');
   
-  const hasNewCirculars = circulars.some(c => new Date(c.date || c.createdAt).getTime() > new Date(lastViewed).getTime());
-  const showBellDot = hasNewCirculars || unreadCount > 0;
+  const latestCircularId = circulars.length > 0 ? circulars[0].id : '';
+  const hasNewCirculars = latestCircularId && latestCircularId !== lastViewedId;
+  const showBellDot = hasNewCirculars;
+
+  useEffect(() => {
+    if (showNotifications && latestCircularId) {
+      localStorage.setItem('lastViewedCircularId', latestCircularId);
+      setLastViewedId(latestCircularId);
+    }
+  }, [showNotifications, latestCircularId]);
 
   const handleBellClick = () => {
     setShowNotifications(!showNotifications);
-    if (!showNotifications) {
-      const now = new Date().toISOString();
-      localStorage.setItem('lastViewedCirculars', now);
-      setLastViewed(now);
-    }
   };
   const wishlistCount = currentUser?.wishlist?.length || 0;
 
