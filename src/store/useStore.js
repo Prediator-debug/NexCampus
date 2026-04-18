@@ -206,15 +206,26 @@ export const useStore = create((set, get) => ({
   setActiveChat: (chatInfo) => set({ activeChat: chatInfo }),
   
   sendMessage: async (msg) => {
-    if (get().isFirebaseActive) {
-      await addDoc(collection(db, 'chats'), { ...msg, timestamp: new Date().toISOString() });
-    } else {
-      set((state) => ({ 
-        messages: [
-          ...state.messages, 
-          { ...msg, id: Date.now().toString(), timestamp: new Date().toISOString(), isRead: false }
-        ] 
-      }));
+    const { isFirebaseActive, messages } = get();
+    const tempId = Date.now().toString();
+    const newMsg = { ...msg, id: tempId, timestamp: new Date().toISOString(), isRead: false };
+
+    // Optimistic Update: Add to local state immediately
+    set(state => ({ messages: [...state.messages, newMsg] }));
+
+    if (isFirebaseActive) {
+      try {
+        // Check for large Base64 strings (Firestore 1MB limit)
+        if (msg.fileUrl && msg.fileUrl.length > 800000) {
+          console.error('File is too large for Firestore');
+          // You might want to show an alert here, but for now we'll just try to send it
+        }
+        await addDoc(collection(db, 'chats'), { ...msg, timestamp: new Date().toISOString() });
+      } catch (error) {
+        console.error('Error sending message:', error);
+        // Rollback on failure
+        set(state => ({ messages: state.messages.filter(m => m.id !== tempId) }));
+      }
     }
   },
 

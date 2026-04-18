@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { User, Settings, ShoppingBag, CheckCircle, Star, MapPin, Book, Award, Clock, Mail } from 'lucide-react';
+import { User, Settings, ShoppingBag, CheckCircle, Star, MapPin, Book, Award, Clock, Mail, Trash2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import EditProfileModal from '../components/ui/EditProfileModal';
 
 export default function Profile() {
   const currentUser = useStore(state => state.currentUser);
   const listings = useStore(state => state.listings);
+  const deleteListing = useStore(state => state.deleteListing);
+  const markAsSold = useStore(state => state.markAsSold);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   // Use current user if logged in, otherwise use placeholder
@@ -131,13 +133,38 @@ export default function Profile() {
                   <div className="p-6">
                     <h3 className="font-bold text-xl mb-4 group-hover:text-primary-600 transition-colors text-slate-900">{listing.title}</h3>
                     <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                      <span className="font-black text-xl tracking-tight text-slate-900">₹{listing.price}</span>
+                      <div className="flex flex-col">
+                        <span className="font-black text-xl tracking-tight text-slate-900">₹{listing.price}</span>
+                        {listing.status === 'sold' && (
+                          <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Sold</span>
+                        )}
+                      </div>
                       <div className="flex gap-2">
-                        <button className="p-2.5 rounded-xl bg-slate-50 hover:bg-primary-600 border border-slate-200 transition-all text-slate-400 hover:text-white hover:border-primary-600">
-                          <Settings size={18} />
+                        <button 
+                          onClick={() => {
+                            if(window.confirm('Mark this item as sold?')) {
+                              useStore.getState().markAsSold(listing.id);
+                            }
+                          }}
+                          className={`p-2.5 rounded-xl border transition-all ${
+                            listing.status === 'sold' 
+                              ? 'bg-green-100 text-green-700 border-green-200' 
+                              : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-primary-600 hover:text-white hover:border-primary-600'
+                          }`}
+                          title="Mark as Sold"
+                        >
+                          <CheckCircle size={18} />
                         </button>
-                        <button className="p-2.5 rounded-xl bg-red-50 hover:bg-red-600 border border-red-100 transition-all text-red-600 hover:text-white hover:border-red-600">
-                          <Clock size={18} />
+                        <button 
+                          onClick={() => {
+                            if(window.confirm('Are you sure you want to delete this listing?')) {
+                              useStore.getState().deleteListing(listing.id);
+                            }
+                          }}
+                          className="p-2.5 rounded-xl bg-red-50 hover:bg-red-600 border border-red-100 transition-all text-red-600 hover:text-white hover:border-red-600"
+                          title="Delete Listing"
+                        >
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </div>

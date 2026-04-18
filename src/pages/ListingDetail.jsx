@@ -23,7 +23,7 @@ function CategoryIcon({ category, size = 32 }) {
 export default function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { listings, currentUser, users, setActiveChat, toggleWishlist, markAsSold } = useStore();
+  const { listings, currentUser, users, setActiveChat, toggleWishlist, markAsSold, deleteListing } = useStore();
   const [shareMsg, setShareMsg] = useState('');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
@@ -224,7 +224,8 @@ export default function ListingDetail() {
                 <button 
                   onClick={() => {
                     if(confirm('Are you sure you want to delete this listing?')) {
-                      // deleteListing(listing.id); 
+                      deleteListing(listing.id);
+                      navigate('/marketplace');
                     }
                   }}
                   className="w-full py-3.5 rounded-xl border border-red-100 text-red-600 hover:bg-red-50 font-bold transition-all text-sm"
