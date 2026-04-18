@@ -12,7 +12,20 @@ export default function Navbar() {
 
   const latestNotifications = circulars.slice(0, 5);
   const hasImportant = circulars.some(c => c.important);
-  const unreadCount = messages.filter(m => m.receiverId === currentUser?.id && m.isRead === false).length;
+  const unreadCount = messages.filter(m => (m.receiverId === currentUser?.id || m.receiverId === 'any' || !m.receiverId) && !m.isRead).length;
+  const [lastViewed, setLastViewed] = useState(() => localStorage.getItem('lastViewedCirculars') || '0');
+  
+  const hasNewCirculars = circulars.some(c => new Date(c.date || c.createdAt).getTime() > new Date(lastViewed).getTime());
+  const showBellDot = hasNewCirculars || unreadCount > 0;
+
+  const handleBellClick = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      const now = new Date().toISOString();
+      localStorage.setItem('lastViewedCirculars', now);
+      setLastViewed(now);
+    }
+  };
   const wishlistCount = currentUser?.wishlist?.length || 0;
 
   const handleLogout = () => {
@@ -84,12 +97,12 @@ export default function Navbar() {
                   onMouseEnter={e => { e.currentTarget.style.color = '#4f46e5'; e.currentTarget.style.background = 'rgba(79,70,229,0.05)'; }}
                   onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = 'transparent'; }}
                 >
-                  <Bell size={19} />
-                  {circulars.length > 0 && (
+                  <Bell size={20} />
+                  {showBellDot && (
                     <span style={{
-                      position: 'absolute', top: '8px', right: '8px', width: '7px', height: '7px',
+                      position: 'absolute', top: '0px', right: '0px', width: '12px', height: '12px',
                       borderRadius: '50%', border: '2px solid #ffffff',
-                      background: hasImportant ? '#ef4444' : '#6366f1'
+                      background: '#ef4444', zIndex: 10
                     }} />
                   )}
                 </button>
@@ -126,8 +139,21 @@ export default function Navbar() {
               <Link to="/messages" style={{ position: 'relative', color: '#64748b', padding: '0.45rem', borderRadius: '8px', display: 'flex', alignItems: 'center', transition: 'all 0.2s', textDecoration: 'none' }}
                 onMouseEnter={e => { e.currentTarget.style.color = '#4f46e5'; e.currentTarget.style.background = 'rgba(79,70,229,0.05)'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = 'transparent'; }}>
-                <MessageCircle size={19} />
-                {unreadCount > 0 && <span style={{ position: 'absolute', top: '8px', right: '8px', width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', border: '2px solid #ffffff' }} />}
+                <div style={{ position: 'relative' }}>
+                  <MessageCircle size={20} />
+                  {unreadCount > 0 && (
+                    <span style={{ 
+                      position: 'absolute', top: '-6px', right: '-6px', 
+                      background: '#22c55e', color: '#fff', fontSize: '10px', 
+                      fontWeight: 800, minWidth: '18px', height: '18px', 
+                      borderRadius: '9px', display: 'flex', alignItems: 'center', 
+                      justifyContent: 'center', border: '2px solid #ffffff',
+                      boxShadow: '0 2px 8px rgba(34,197,94,0.3)', zIndex: 10
+                    }}>
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
               </Link>
 
               {/* Wishlist */}
@@ -226,8 +252,21 @@ export default function Navbar() {
           {currentUser && (
             <>
               <Link to="/messages" style={{ position: 'relative', color: '#64748b', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
-                <MessageCircle size={20} />
-                {unreadCount > 0 && <span style={{ position: 'absolute', top: '6px', right: '6px', width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', border: '2px solid #ffffff' }} />}
+                <div style={{ position: 'relative' }}>
+                  <MessageCircle size={22} />
+                  {unreadCount > 0 && (
+                    <span style={{ 
+                      position: 'absolute', top: '-6px', right: '-6px', 
+                      background: '#22c55e', color: '#fff', fontSize: '10px', 
+                      fontWeight: 800, minWidth: '18px', height: '18px', 
+                      borderRadius: '9px', display: 'flex', alignItems: 'center', 
+                      justifyContent: 'center', border: '2px solid #ffffff',
+                      boxShadow: '0 2px 8px rgba(34,197,94,0.3)', zIndex: 10
+                    }}>
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
               </Link>
               <Link to="/wishlist" style={{ position: 'relative', color: '#64748b', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
                 <Heart size={20} />
@@ -243,10 +282,10 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-              <button onClick={() => setShowNotifications(!showNotifications)}
+              <button onClick={handleBellClick}
                 style={{ position: 'relative', color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
-                <Bell size={20} />
-                {circulars.length > 0 && <span style={{ position: 'absolute', top: '6px', right: '6px', width: '7px', height: '7px', borderRadius: '50%', background: hasImportant ? '#ef4444' : '#6366f1', border: '2px solid #ffffff' }} />}
+                <Bell size={22} />
+                {showBellDot && <span style={{ position: 'absolute', top: '0px', right: '0px', width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', border: '2px solid #ffffff', zIndex: 10 }} />}
               </button>
             </>
           )}

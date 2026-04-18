@@ -13,6 +13,9 @@ export default function Messages() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (selectedChat) {
+      useStore.getState().markMessagesAsRead(selectedChat.otherId);
+    }
   }, [messages, selectedChat]);
 
   if (!currentUser) {
@@ -30,7 +33,7 @@ export default function Messages() {
 
   // Build unique conversations list
   const myMessages = messages.filter(
-    m => m.senderId === currentUser.id || m.receiverId === currentUser.id
+    m => m.senderId === currentUser.id || m.receiverId === currentUser.id || m.receiverId === 'any'
   );
 
   // Group by the other person's ID

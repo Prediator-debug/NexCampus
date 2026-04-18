@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { auth, db } from '../firebase/config';
 import { 
   collection, doc, setDoc, getDoc, onSnapshot, 
-  addDoc, deleteDoc, query, orderBy 
+  addDoc, deleteDoc, query, orderBy, writeBatch 
 } from 'firebase/firestore';
 import { 
   signInWithEmailAndPassword, createUserWithEmailAndPassword, 
@@ -128,7 +128,9 @@ export const useStore = create((set, get) => ({
   circulars: initialCirculars,
   currentUser: null,
   activeChat: null,
-  messages: [],
+  messages: [
+    { id: 'm1', senderId: 'system', receiverId: 'any', text: 'Welcome to NexCampus!', createdAt: new Date().toISOString(), isRead: false }
+  ],
   isInitialized: false,
   isAddListingModalOpen: false,
 
@@ -227,6 +229,41 @@ export const useStore = create((set, get) => ({
         set(state => ({ messages: state.messages.filter(m => m.id !== tempId) }));
       }
     }
+  },
+  
+  markMessagesAsRead: async (otherId) => {
+    const { currentUser, isFirebaseActive, messages } = get();
+    if (!currentUser) return;
+
+    // Filter messages to mark as read
+    const messagesToUpdate = messages.filter(m => 
+      (m.receiverId === currentUser.id || m.receiverId === 'any') && 
+      m.senderId === otherId && 
+      !m.isRead
+    );
+
+    if (messagesToUpdate.length === 0) return;
+
+    if (isFirebaseActive) {
+      try {
+        const batch = writeBatch(db);
+        messagesToUpdate.forEach(msg => {
+          const msgRef = doc(db, 'chats', msg.id);
+          batch.update(msgRef, { isRead: true });
+        });
+        await batch.commit();
+      } catch (error) {
+        console.error('Error updating read status in Firestore:', error);
+      }
+    }
+    
+    set(state => ({
+      messages: state.messages.map(m => 
+        (m.receiverId === currentUser.id || m.receiverId === 'any') && m.senderId === otherId
+          ? { ...m, isRead: true }
+          : m
+      )
+    }));
   },
 
   register: async (userData) => {

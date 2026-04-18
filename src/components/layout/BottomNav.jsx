@@ -4,7 +4,7 @@ import { useStore } from '../../store/useStore';
 
 export default function BottomNav() {
   const location = useLocation();
-  const { currentUser } = useStore();
+  const { currentUser, messages } = useStore();
   const wishlistCount = currentUser?.wishlist?.length || 0;
 
   const isActive = (path) => location.pathname === path;
@@ -44,11 +44,18 @@ export default function BottomNav() {
  
         <Link 
           to="/messages" 
-          className={`flex flex-col items-center justify-center w-12 h-12 rounded-[1.25rem] transition-all duration-300 ${
+          className={`relative flex flex-col items-center justify-center w-12 h-12 rounded-[1.25rem] transition-all duration-300 ${
             isActive('/messages') ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <MessageSquare size={20} />
+          <div className="relative">
+            <MessageSquare size={24} />
+            {messages.filter(m => (m.receiverId === currentUser?.id || m.receiverId === 'any' || !m.receiverId) && !m.isRead).length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-lg z-10">
+                {messages.filter(m => (m.receiverId === currentUser?.id || m.receiverId === 'any' || !m.receiverId) && !m.isRead).length}
+              </span>
+            )}
+          </div>
         </Link>
  
         <Link 
