@@ -139,7 +139,7 @@ export default function Home() {
             {[
               { title: "Books & Notes", icon: BookOpen, desc: "Find cheap course materials and handwritten notes", filters: ['Books', 'Notes'], color: 'from-blue-500/20 to-cyan-500/20' },
               { title: "Electronics", icon: Laptop, desc: "Laptops, tablets, calculators and tech accessories", filters: ['Electronics'], color: 'from-indigo-500/20 to-purple-500/20' },
-              { title: "Hostel Needs", icon: ShoppingCart, desc: "Everyday essentials, appliances and hostel gear", filters: ['Others'], color: 'from-pink-500/20 to-rose-500/20' },
+              { title: "Hostel Needs", icon: ShoppingCart, desc: "Everyday essentials, appliances and hostel gear", filters: ['Hostel'], color: 'from-pink-500/20 to-rose-500/20' },
             ].map((item, i) => (
               <div
                 key={i}

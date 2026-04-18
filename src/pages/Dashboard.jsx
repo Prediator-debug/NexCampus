@@ -191,6 +191,20 @@ export default function Dashboard() {
                                   </button>
                                 </>
                               )}
+                              {/* Admin can delete any non-admin user */}
+                              {user.role !== 'admin' && (
+                                <button 
+                                  onClick={() => {
+                                    if(window.confirm(`Delete user "${user.name}" and all their data?`)) {
+                                      rejectUser(user.id);
+                                    }
+                                  }} 
+                                  className="p-1.5 rounded-lg bg-red-50 hover:bg-red-500 text-red-500 hover:text-white transition-all border border-red-100 hover:border-red-500"
+                                  title="Delete User"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>

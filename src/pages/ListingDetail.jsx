@@ -17,6 +17,7 @@ const typeStyles = {
 function CategoryIcon({ category, size = 32 }) {
   if (category === 'Books' || category === 'Notes') return <BookOpen size={size} />;
   if (category === 'Electronics') return <Laptop size={size} />;
+  if (category === 'Hostel') return <ShoppingCart size={size} />;
   return <ShoppingCart size={size} />;
 }
 

@@ -35,7 +35,7 @@ export default function MobileFilters({ isOpen, onClose, selectedCategories, tog
           <section>
             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 ml-1">Categories</h4>
             <div className="grid grid-cols-2 gap-3">
-              {['Books', 'Notes', 'Electronics', 'Hostel', 'Lab Coat', 'Other'].map(cat => {
+              {['Books', 'Notes', 'Electronics', 'Hostel', 'Other'].map(cat => {
                 const isSelected = selectedCategories.includes(cat);
                 return (
                   <button

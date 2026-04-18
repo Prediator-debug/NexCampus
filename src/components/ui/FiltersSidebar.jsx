@@ -22,7 +22,7 @@ export default function FiltersSidebar({
         <div>
           <h4 className="text-xs font-black uppercase tracking-widest text-dark-textMuted mb-4">Category</h4>
           <div className="space-y-3">
-            {['All', 'Books', 'Notes', 'Electronics', 'Others'].map(cat => (
+            {['All', 'Books', 'Notes', 'Electronics', 'Hostel', 'Others'].map(cat => (
               <label key={cat} className="flex items-center group cursor-pointer">
                 <div className="relative flex items-center">
                   <input 

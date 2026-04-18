@@ -142,6 +142,7 @@ export default function AddListingModal({ isOpen, onClose }) {
                 <option value="Books">Books</option>
                 <option value="Notes">Notes</option>
                 <option value="Electronics">Electronics</option>
+                <option value="Hostel">Hostel Needs</option>
                 <option value="Others">Others</option>
               </select>
             </div>

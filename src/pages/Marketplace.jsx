@@ -113,7 +113,7 @@ export default function Marketplace() {
 
             {/* Category Chips Bar */}
             <div className="flex items-center justify-center flex-wrap gap-2 mt-10">
-              {['All', 'Books', 'Notes', 'Electronics', 'Hostel', 'Lab Coat', 'Other'].map(cat => (
+              {['All', 'Books', 'Notes', 'Electronics', 'Hostel', 'Other'].map(cat => (
                 <button
                   key={cat}
                   onClick={() => toggleCategory(cat)}
