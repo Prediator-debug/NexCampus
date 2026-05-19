@@ -156,20 +156,33 @@ export const useStore = create((set, get) => ({
     // Auth Listener
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        const userData = userDoc.exists() ? userDoc.data() : {};
-        
-        // Hardcoded admin emails
-        const isAdmin = user.email === 'shubhamtorkad77@gmail.com' || user.email === 'jadhavdarshan440@gmail.com';
-        
-        set({ 
-          currentUser: { 
-            id: user.uid, 
-            ...userData, 
-            email: user.email,
-            role: isAdmin ? 'admin' : (userData.role || 'student') 
-          } 
-        });
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          
+          // Hardcoded admin emails
+          const isAdmin = user.email === 'shubhamtorkad77@gmail.com' || user.email === 'jadhavdarshan440@gmail.com';
+          
+          set({ 
+            currentUser: { 
+              id: user.uid, 
+              ...userData, 
+              email: user.email,
+              role: isAdmin ? 'admin' : (userData.role || 'student') 
+            } 
+          });
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Fallback if permission denied or other error
+          const isAdmin = user.email === 'shubhamtorkad77@gmail.com' || user.email === 'jadhavdarshan440@gmail.com';
+          set({ 
+            currentUser: { 
+              id: user.uid, 
+              email: user.email,
+              role: isAdmin ? 'admin' : 'student' 
+            } 
+          });
+        }
       } else {
         set({ currentUser: null });
       }
@@ -180,27 +193,27 @@ export const useStore = create((set, get) => ({
     onSnapshot(listingsQ, (snapshot) => {
       const liveListings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       set({ listings: liveListings });
-    });
+    }, (error) => console.error("Listings listener error:", error));
 
     // Users Listener (Admin only in real app, simplified here)
     onSnapshot(collection(db, 'users'), (snapshot) => {
       const liveUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       set({ users: liveUsers });
-    });
+    }, (error) => console.error("Users listener error:", error));
 
     // Messages Listener
     const messagesQ = query(collection(db, 'chats'), orderBy('timestamp', 'asc'));
     onSnapshot(messagesQ, (snapshot) => {
       const liveMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       set({ messages: liveMessages });
-    });
+    }, (error) => console.error("Messages listener error:", error));
 
     // Circulars Listener
     const circularsQ = query(collection(db, 'circulars'), orderBy('date', 'desc'));
     onSnapshot(circularsQ, (snapshot) => {
       const liveCirculars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       set({ circulars: liveCirculars });
-    });
+    }, (error) => console.error("Circulars listener error:", error));
 
     set({ isInitialized: true });
   },

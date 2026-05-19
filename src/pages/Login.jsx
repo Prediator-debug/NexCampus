@@ -37,7 +37,17 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Login failed. Check console for details.");
+      let message = "Login failed. Please try again.";
+      if (error.code === 'auth/invalid-credential') {
+        message = "Invalid email or password. If you haven't created an account yet, please register first.";
+      } else if (error.code === 'auth/user-not-found') {
+        message = "Account not found. Please register first.";
+      } else if (error.code === 'auth/wrong-password') {
+        message = "Incorrect password.";
+      } else {
+        message = `Login failed: ${error.message}`;
+      }
+      alert(message);
     } finally {
       setIsLoading(false);
     }
